@@ -1,5 +1,5 @@
 # steam-account-switcher
-Steam Account Switcher written in Python with mobile support!
+Steam Account Switcher written in Python with mobile support!  
 Made in Python 2.7
 
 Binarys up soon.
