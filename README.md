@@ -4,7 +4,14 @@ Made in Python 2.7
 
 Binarys up soon.
 
-## Instructions (if you want to run from source)
-* Install requests, pyautoit from pip
-* Put https://github.com/philippj/steam-totp in the running directory
+## TO-DO
+* Encryption / Master password
+
+## Instructions
+* Install dependencies (see requirements.txt)
+* Run the python script
 * Enjoy
+
+## Config
+Config is stored in %appdata%\jfx\users.json or DRIVE:\Users\USERNAME\AppData\Roaming\jfx\users.json
+As of now encryption hasn't been added so please note your credentials are stored in plaintext,
