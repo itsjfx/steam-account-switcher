@@ -14,7 +14,6 @@ import steam.guard as sa
 configpath = os.getenv('APPDATA')+"\\jfx"
 config = configpath + "\\users.json"
 
-
 # Config
 if not os.path.exists(configpath):
     os.makedirs(configpath)
@@ -36,6 +35,15 @@ except:
 def cls():
     os.system('cls' if os.name=='nt' else 'clear')
 	
+def enter():
+	raw_input("Press ENTER to continue . . .")
+
+def validateInput(input):
+	if input.isdigit() == False or int(input) >= i or int(input) < 1:
+		return False
+	else:
+		return True
+	
 def createNewAccount():
 	newusername = raw_input("Enter the username: ")
 	newpassword = raw_input("Enter the password: ")
@@ -51,14 +59,14 @@ def createNewAccount():
 		json.dump(data, outfile, sort_keys = False, indent = 4, ensure_ascii=False)
 	
 	print "Account created."
-	raw_input("Press ENTER to continue . . .")
+	enter()
 	main()
 
 	
 def deleteAccount(i):
 	chosenDelete = raw_input("Type the number for the account you would like to delete: ")
 	
-	while chosenDelete.isdigit() == False or int(chosenDelete) >= i or int(chosenDelete) < 1: #validation, check if its a number
+	while validateInput(chosenDelete) == False: #validation, check if its a number
 		print "ERROR: Choose an account on the list."
 		chosenDelete = raw_input("Type the number for the account you would like to delete: ")
 		
@@ -69,33 +77,46 @@ def deleteAccount(i):
 		json.dump(data, outfile, sort_keys = False, indent = 4, ensure_ascii=False)
 	
 	print "Account deleted."
-	raw_input("Press ENTER to continue . . .")
+	enter()
 	main()
 
 	
 def editConfig():
 	subprocess.call(['notepad.exe', config]) #we use subprocess here because its better and it works
-	raw_input("Press ENTER to continue . . .")
+	enter()
 	main()
 
 def browserLogin(i):
-	chosenAccount = None
 	chosenAccount = raw_input("Type the number for the account you would like to display login details for: ")
 	
-	while chosenAccount.isdigit() == False or int(chosenAccount) >= i or int(chosenAccount) < 1: #validation, check if its a number
+	while validateInput(chosenAccount) == False: #validation, check if its a number
 		print "ERROR: Choose an account on the list"
 		chosenAccount = raw_input("Type the number for the account you would like to display login details for: ")
 
-	chosenAccount = int(chosenAccount)
-	chosenAccount = chosenAccount - 1 #remove the 1 to correct it with the json file
+	chosenAccount = int(chosenAccount) - 1 #line it up with json, make int
 	
 	print "username: {}".format(data['accounts'][chosenAccount]['username'])
 	print "password: {}".format(data['accounts'][chosenAccount]['password'])
 	if data['accounts'][chosenAccount]['mobile']:
 		print "2FA code: {}".format(sa.generate_twofactor_code(base64.b64decode(data['accounts'][chosenAccount]['mobile'])))
-	raw_input("Press ENTER to continue . . .")
+	enter()
 	main()
-		
+	
+def mobileCode(i):
+	chosenAccount = raw_input("Type the number for the account you would like to display login details for: ")
+	
+	while validateInput(chosenAccount) == False: #validation, check if its a number
+		print "ERROR: Choose an account on the list"
+		chosenAccount = raw_input("Type the number for the account you would like to display login details for: ")
+
+	chosenAccount = int(chosenAccount) - 1 #line it up with json, make int
+	if data['accounts'][chosenAccount]['mobile']:
+		print "2FA code: {}".format(sa.generate_twofactor_code(base64.b64decode(data['accounts'][chosenAccount]['mobile'])))
+	else:
+		print "Error finding mobile code for account"
+	enter()
+	main()
+	
 def main ():
 
 	cls()
@@ -105,24 +126,28 @@ def main ():
 	print "########################"
 	print ""
 	
+	global i
 	i = 1
 	for account in data['accounts']:
 		print str(i) + ' - ' + account['username']
 		i = i + 1
 
-	print ""
+	print
 	print "n - Add new account"
 	print "d - Delete an account"
 	print "e - Edit config"
 	print "b - Print login details (for browser logins)"
+	print "c - Mobile code only"
+	print
+	print "Typing in the account and ENTER will auto login to that account"
 
 	chosenAccount = raw_input("Type your choice then press ENTER: ")
 
 
 	while chosenAccount.isdigit() == False: # validation, check if its a number, this check is needed to differentiate the character options from numerical and also to provide some nice feedback to the user
-		if chosenAccount == "n" or chosenAccount == "e" or chosenAccount == "d" or chosenAccount == "b": # we skip if its one of the alpha values
+		if chosenAccount == "n" or chosenAccount == "e" or chosenAccount == "d" or chosenAccount == "b" or chosenAccount == "c": # we skip if its one of the alpha values
 			break
-		print "ERROR: Please enter a numerical value"
+		print "ERROR: Please enter a valid option"
 		chosenAccount = raw_input("Type the number for the account then press ENTER: ")
 
 
@@ -138,15 +163,17 @@ def main ():
 			
 		if chosenAccount == "b":
 			browserLogin(i)
+			
+		if chosenAccount == "c":
+			mobileCode(i)
 
 	else: #they chose a number of some sorts
 
-		while chosenAccount.isdigit() == False or int(chosenAccount) >= i or int(chosenAccount) < 1: #validation, check if the account exists
+		while validateInput(chosenAccount) == False: #validation, check if the account exists
 			print "ERROR: Choose an account on the list."
 			chosenAccount = raw_input("Type the number for the account then press ENTER: ")
 
-		chosenAccount = int(chosenAccount)
-		chosenAccount = chosenAccount - 1 #remove the 1 to correct it with the json file
+		chosenAccount = int(chosenAccount) - 1
 		
 		print "Killing Steam..."
 		os.system('taskkill /f /im steam.exe') #kill steam
